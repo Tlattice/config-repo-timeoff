@@ -1,0 +1,26 @@
+---
+- name: Install Jenkins
+  hosts: jenkins
+  remote_user: ec2-user
+
+  tasks:
+  - name: Install openjdk8
+    become: yes
+    ansible.builtin.yum:
+      name: java-1.8.0-openjdk.x86_64
+      state: latest
+  - name: Install docker
+    become: yes
+    ansible.builtin.yum:
+      name: docker.x86_64
+      state: latest
+# docker run -p 8080:8080 -p 50000:50000 jenkins/jenkins:lts-jdk11
+# docker run -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts-jdk11
+  - name: Start docker service
+    become: yes
+    ansible.builtin.systemd:
+      state: started
+      name: docker
+  - name: Run Jenkins container
+    become: yes
+    ansible.builtin.command: docker run -p 80:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts-jdk11
