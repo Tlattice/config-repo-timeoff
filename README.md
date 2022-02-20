@@ -33,3 +33,7 @@ ansible-playbook -i nventories/timeoff/hosts <playbook>
 ```
 ansible-playbook -i inventories/hosts.ini playbooks/install_jenkins.yaml
 ```
+
+### Jenkins-git integration
+
+- install plugin 'Github Pull Request Builder'

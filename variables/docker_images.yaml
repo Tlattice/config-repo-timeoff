@@ -1,0 +1,5 @@
+jenkins_jcasc:
+  artifactory: tlattice.jfrog.io
+  repo: infra
+  image: jenkins_jcasc
+  tag: latest

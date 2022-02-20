@@ -9,21 +9,62 @@
     ansible.builtin.yum:
       name: docker.x86_64
       state: latest
-  - name: Install dependencies
-      ansible.builtin.command: pip3 install requests docker
+  - name: Create docker group
+    ansible.builtin.group:
+      name: docker
+      state: present
+  - name: Add user to docker group
+    become: yes
+    ansible.builtin.user:
+      name: ec2-user
+      group: docker
+  - name: Reset ssh connection.
+    meta: reset_connection
+  - name: Install python3 requests docker
+    ansible.builtin.command:
+      cmd: pip3 install requests docker
   - name: Start docker service
     become: yes
     ansible.builtin.systemd:
       state: started
       name: docker
+# - name: Create docker directory
+#   file:
+#     path: ~/.docker
+#     state: directory
+#     owner: ec2-user
+#     group: ec2-user
+  - name: Copy docker credentials
+    ansible.builtin.copy:
+      src: ../configs/docker/credentials/docker_config.json
+      dest: ~/.docker/config.json
+      force: no
+      owner: ec2-user
+      group: ec2-user
+  - name: Login into artifactory
+    ansible.builtin.command:
+      cmd: docker login tlattice.jfrog.io
+# - name: Create jenkins bind mount
+#   file:
+#     path: ~/jenkins_home
+#     state: directory
+#     owner: ec2-user
+#     group: ec2-user
+  - name: Copy jcasc files
+    ansible.builtin.copy:
+      src: ../configs/jenkins/
+      dest: ~/jenkins_home
+      force: yes
+      owner: ec2-user
+# group: ec2-user
   - name: Run Jenkins container
-    become: yes
     docker_container:
       name: jenkins
-      image: "jenkins/jenkins:lts-jdk11"
+      image: "tlattice.jfrog.io/infra/jenkins_jcasc:1.1"
       state: started
       ports:
         - "80:8080"
-        - "50000:50000"
       volumes:
-        - "jenkins_home:/home/ec2-user/"
+        - "jenkins_home:/home/ec2-user/jenkins_home"
+      env:
+        CASC_JENKINS_CONFIG: "/home/ec2-user/jenkins_home"
