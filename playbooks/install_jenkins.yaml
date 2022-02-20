@@ -64,7 +64,9 @@
       state: started
       ports:
         - "80:8080"
-      volumes:
-        - "jenkins_home:/home/ec2-user/jenkins_home"
+      mounts:
+        - source: "/home/ec2-user/jenkins_home"
+          target: "/var/jenkins_home"
+          type: "bind"
       env:
-        CASC_JENKINS_CONFIG: "/home/ec2-user/jenkins_home"
+        CASC_JENKINS_CONFIG: "/var/jenkins_home"
