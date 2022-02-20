@@ -8,3 +8,29 @@ jenkins:
       users:
        - id: user1
          password: user1
+jobs:
+  - script: >
+        pipeline {
+            agent any
+            stages {
+                stage('Clone repo') {
+                    steps {
+                        sh 'git clone https://github.com/Tlattice/timeoff-management-application.git'
+                    }
+                }
+                stage('Create image') {
+                    steps {
+                        sh 'cd timeoff-management-application'
+                        sh 'docker build --tag tlattice.jfrog.io/infra/jenkins_jcasc .'
+                        sh 'docker login tlattice.jfrog.io'
+                        sh 'docker push'
+                    }
+                }
+                stage('Push image') {
+                    steps {
+                        sh 'docker login tlattice.jfrog.io'
+                        sh 'docker push'
+                    }
+                }
+            }
+        }
